@@ -22,6 +22,8 @@ public class Main extends Thread{
 
     private ArrayList<InetAddress> servers = new ArrayList<>();
 
+    
+    
     public Main() {
         PORTA = 5000;
         TAM_BUFFER = 4096;
@@ -111,7 +113,7 @@ public class Main extends Thread{
         }
 
         if (euAqui || isMyIp(this.lider.getHostAddress())) {
-            System.out.println("Leader is myself.");
+            System.out.println("Eu sou o líder.");
             return;
         }
 
@@ -130,7 +132,7 @@ public class Main extends Thread{
                 
                 CLIENTSOCKET.send(sendPacket);
                 
-                System.out.println("receive1");
+                System.out.println("receber 1");
 
                 DatagramPacket receivePacket = new DatagramPacket(bufferEntrada, bufferEntrada.length);
                 
@@ -146,7 +148,7 @@ public class Main extends Thread{
                         //System.out.println(ip+" ip recebido 2");
                         //this.leader = InetAddress.getByName(ip);
                         
-                        System.out.println("receive2");
+                        System.out.println("receber 2);
                         
                         break;
                     } catch (SocketTimeoutException e) {
@@ -168,7 +170,7 @@ public class Main extends Thread{
             e.printStackTrace();
         }
 
-        System.out.println("Leader is: " + this.lider.getHostAddress());
+        System.out.println("O líder é: " + this.lider.getHostAddress());
     }
 
     private void getLeader() {
@@ -186,7 +188,7 @@ public class Main extends Thread{
 
                     DatagramPacket sendPacket = new DatagramPacket(bufferSaida, bufferSaida.length, server, PORTA);
                     
-                    System.out.println(new String(sendPacket.getData()).trim()+ " enviando para o leader");
+                    System.out.println(new String(sendPacket.getData()).trim()+ " enviando para o líder...");
                     
                     CLIENTSOCKET.send(sendPacket);
 
@@ -195,7 +197,7 @@ public class Main extends Thread{
 
                     try {
                         
-                        System.out.println(new String(receivePacket.getData()).trim()+ " recebendo do leader..");
+                        System.out.println(new String(receivePacket.getData()).trim()+ " recebendo do líder...");
                         CLIENTSOCKET.receive(receivePacket);
                         this.lider = InetAddress.getByName(new String(receivePacket.getData()).trim());
                     } catch (SocketTimeoutException e) {
@@ -209,7 +211,7 @@ public class Main extends Thread{
     }
 
     private void electLeader() {
-        System.out.println("Electing new leader");
+        System.out.println("Escolhendo um novo líder");
 
         InetAddress highest = null;
         int processors = 0;
@@ -225,7 +227,7 @@ public class Main extends Thread{
 
                     DatagramPacket sendPacket = new DatagramPacket(bufferSaida, bufferSaida.length, server, PORTA);
                     
-                    System.out.println(new String(sendPacket.getData()).trim()+ " enviando processors");
+                    System.out.println(new String(sendPacket.getData()).trim()+ " enviando processos");
                     
                     CLIENTSOCKET.send(sendPacket);
                     
