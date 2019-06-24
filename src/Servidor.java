@@ -8,17 +8,17 @@ public class Servidor extends Thread {
 
     private final int PORT;
     private final int BUFFER_SIZE;
-    private InetAddress leader = null;
+    private InetAddress lider = null;
 
-    private ArrayList<InetAddress> servers = new ArrayList<>();
+    private ArrayList<InetAddress> servidores = new ArrayList<>();
 
     public Servidor() {
         PORT = 5000;
         BUFFER_SIZE = 4096;
 
         try {
-            servers.add(InetAddress.getByName("192.168.0.102"));
-            servers.add(InetAddress.getByName("192.168.0.2"));
+            servidores.add(InetAddress.getByName("192.168.0.102"));
+            servidores.add(InetAddress.getByName("192.168.0.2"));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -43,11 +43,11 @@ public class Servidor extends Thread {
                 System.out.println("Received: " + message);
                 String mensagem = "";
                 if (message.trim().contains("elect")) {
-                    leader = InetAddress.getByName(message.trim().split("_")[1]);
+                    lider = InetAddress.getByName(message.trim().split("_")[1]);
                 } else {
                     switch (message.trim().toLowerCase()) {
                         case "leader":
-                            mensagem = this.leader.getHostAddress();
+                            mensagem = this.lider.getHostAddress();
                             break;
                         case "processors":
                             mensagem = "" + Runtime.getRuntime().availableProcessors();
@@ -68,11 +68,11 @@ public class Servidor extends Thread {
     private void validateLeader() {
         boolean myself = false;
 
-        if (leader == null) {
+        if (lider == null) {
             getLeader();
-            if (leader == null) {
+            if (lider == null) {
                 try {
-                    this.leader = InetAddress.getByName(InetAddress.getLocalHost().getHostAddress());
+                    this.lider = InetAddress.getByName(InetAddress.getLocalHost().getHostAddress());
                     myself = true;
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
@@ -85,7 +85,7 @@ public class Servidor extends Thread {
         }
 
         try {
-            InetAddress leader = InetAddress.getByName(this.leader.getHostAddress());
+            InetAddress leader = InetAddress.getByName(this.lider.getHostAddress());
             if (leader.isReachable(5000)) {
                 DatagramSocket clientSocket = new DatagramSocket(PORT);
                 String sentence = "leader";
@@ -100,7 +100,7 @@ public class Servidor extends Thread {
                 try {
                     clientSocket.receive(receivePacket);
                     String ip = new String(receivePacket.getData()).trim();
-                    this.leader = InetAddress.getByName(ip);
+                    this.lider = InetAddress.getByName(ip);
                 } catch (SocketTimeoutException e) {
                     System.out.println(e.getMessage());
                     electLeader();
@@ -115,7 +115,7 @@ public class Servidor extends Thread {
     }
 
     private void getLeader() {
-        for (InetAddress server : servers) {
+        for (InetAddress server : servidores) {
             try {
                 if (myIp(server.getHostAddress())) {
                     continue;
@@ -132,7 +132,7 @@ public class Servidor extends Thread {
                     DatagramPacket receivePacket = new DatagramPacket(bufferIn, bufferIn.length);
                     try {
                         clientSocket.receive(receivePacket);
-                        this.leader = InetAddress.getByName(new String(receivePacket.getData()).trim());
+                        this.lider = InetAddress.getByName(new String(receivePacket.getData()).trim());
                     } catch (SocketTimeoutException e) {
                         System.out.println(e.getMessage());
                     }
@@ -147,7 +147,7 @@ public class Servidor extends Thread {
     private void electLeader() {
         InetAddress highest = null;
         int processors = 0;
-        for (InetAddress server : servers) {
+        for (InetAddress server : servidores) {
             try {
                 if (server.isReachable(5000)) {
                     DatagramSocket clientSocket = new DatagramSocket(PORT);
@@ -176,7 +176,7 @@ public class Servidor extends Thread {
         }
 
         if (highest != null) {
-            for (InetAddress server : servers) {
+            for (InetAddress server : servidores) {
                 try {
                     if (server.isReachable(5000)) {
                         DatagramSocket clientSocket = new DatagramSocket(PORT);
