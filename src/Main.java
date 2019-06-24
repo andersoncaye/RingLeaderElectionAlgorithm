@@ -148,7 +148,7 @@ public class Main extends Thread{
                         //System.out.println(ip+" ip recebido 2");
                         //this.leader = InetAddress.getByName(ip);
                         
-                        System.out.println("receber 2);
+                        System.out.println("receber 2");
                         
                         break;
                     } catch (SocketTimeoutException e) {
