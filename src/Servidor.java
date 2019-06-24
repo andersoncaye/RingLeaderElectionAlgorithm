@@ -15,12 +15,12 @@ public class Servidor extends Thread {
     private ArrayList<InetAddress> servidores = new ArrayList<>();
 
     public Servidor() {
-        PORT = 5000;
+        PORT = 9000;
         BUFFER_TAMANHO = 4096;
 
         try {
-            servidores.add(InetAddress.getByName("192.168.0.102"));
-            servidores.add(InetAddress.getByName("192.168.0.2"));
+            servidores.add(InetAddress.getByName("10.3.15.20"));
+            servidores.add(InetAddress.getByName("10.3.15.21"));
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -31,12 +31,12 @@ public class Servidor extends Thread {
 
         try {
             DatagramSocket socketServidores = new DatagramSocket(PORT);
-            byte[] bufferIn;
-            byte[] bufferOut;
+            byte[] bufferEntrada;
+            byte[] bufferSaida;
             while (true) {
-                bufferIn = new byte[BUFFER_TAMANHO];
+                bufferEntrada = new byte[BUFFER_TAMANHO];
 
-                DatagramPacket receivePacket = new DatagramPacket(bufferIn, bufferIn.length);
+                DatagramPacket receivePacket = new DatagramPacket(bufferEntrada, bufferEntrada.length);
                 socketServidores.receive(receivePacket);
                 InetAddress ipCliente = receivePacket.getAddress();
                 int portaCliente = receivePacket.getPort();
@@ -56,9 +56,9 @@ public class Servidor extends Thread {
                             break;
                     }
 
-                    bufferOut = new byte[BUFFER_TAMANHO];
-                    bufferOut = mensagem.getBytes();
-                    DatagramPacket sendPacket = new DatagramPacket(bufferOut, bufferOut.length, ipCliente, portaCliente);
+                    bufferSaida = new byte[BUFFER_TAMANHO];
+                    bufferSaida = mensagem.getBytes();
+                    DatagramPacket sendPacket = new DatagramPacket(bufferSaida, bufferSaida.length, ipCliente, portaCliente);
                     socketServidores.send(sendPacket);
                 }
             }
@@ -88,7 +88,7 @@ public class Servidor extends Thread {
 
         try {
             InetAddress leader = InetAddress.getByName(this.lider.getHostAddress());
-            if (leader.isReachable(5000)) {
+            if (leader.isReachable(PORT)) {
                 DatagramSocket clientSocket = new DatagramSocket(PORT);
                 String sentence = "leader";
 
@@ -122,7 +122,7 @@ public class Servidor extends Thread {
                 if (myIp(server.getHostAddress())) {
                     continue;
                 }
-                if (server.isReachable(5000)) {
+                if (server.isReachable(PORT)) {
                     DatagramSocket clientSocket = new DatagramSocket(PORT);
                     String sentence = "leader";
                     byte[] bufferIn = new byte[BUFFER_TAMANHO];
@@ -151,7 +151,7 @@ public class Servidor extends Thread {
         int processors = 0;
         for (InetAddress server : servidores) {
             try {
-                if (server.isReachable(5000)) {
+                if (server.isReachable(PORT)) {
                     DatagramSocket clientSocket = new DatagramSocket(PORT);
                     String sentence = "processors";
                     byte[] bufferIn = new byte[BUFFER_TAMANHO];
@@ -180,7 +180,7 @@ public class Servidor extends Thread {
         if (highest != null) {
             for (InetAddress server : servidores) {
                 try {
-                    if (server.isReachable(5000)) {
+                    if (server.isReachable(PORT)) {
                         DatagramSocket clientSocket = new DatagramSocket(PORT);
                         String sentence = "elect_" + highest.getHostAddress();
 
