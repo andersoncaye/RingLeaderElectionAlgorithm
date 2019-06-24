@@ -7,14 +7,14 @@ import java.util.Enumeration;
 public class Servidor extends Thread {
 
     private final int PORT;
-    private final int BUFFER_SIZE;
+    private final int BUFFER_TAMANHO;
     private InetAddress lider = null;
 
     private ArrayList<InetAddress> servidores = new ArrayList<>();
 
     public Servidor() {
         PORT = 5000;
-        BUFFER_SIZE = 4096;
+        BUFFER_TAMANHO = 4096;
 
         try {
             servidores.add(InetAddress.getByName("192.168.0.102"));
@@ -25,27 +25,27 @@ public class Servidor extends Thread {
     }
 
     public void run() {
-        validateLeader();
+        validaLider();
 
         try {
-            DatagramSocket serverSocket = new DatagramSocket(PORT);
+            DatagramSocket socketServidores = new DatagramSocket(PORT);
             byte[] bufferIn;
             byte[] bufferOut;
             while (true) {
-                bufferIn = new byte[BUFFER_SIZE];
+                bufferIn = new byte[BUFFER_TAMANHO];
 
                 DatagramPacket receivePacket = new DatagramPacket(bufferIn, bufferIn.length);
-                serverSocket.receive(receivePacket);
+                socketServidores.receive(receivePacket);
                 InetAddress ipCliente = receivePacket.getAddress();
                 int portaCliente = receivePacket.getPort();
 
-                String message = new String(receivePacket.getData());
-                System.out.println("Received: " + message);
+                String msg = new String(receivePacket.getData());
+                System.out.println("Received: " + msg);
                 String mensagem = "";
-                if (message.trim().contains("elect")) {
-                    lider = InetAddress.getByName(message.trim().split("_")[1]);
+                if (msg.trim().contains("elect")) {
+                    lider = InetAddress.getByName(msg.trim().split("_")[1]);
                 } else {
-                    switch (message.trim().toLowerCase()) {
+                    switch (msg.trim().toLowerCase()) {
                         case "leader":
                             mensagem = this.lider.getHostAddress();
                             break;
@@ -54,10 +54,10 @@ public class Servidor extends Thread {
                             break;
                     }
 
-                    bufferOut = new byte[BUFFER_SIZE];
+                    bufferOut = new byte[BUFFER_TAMANHO];
                     bufferOut = mensagem.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(bufferOut, bufferOut.length, ipCliente, portaCliente);
-                    serverSocket.send(sendPacket);
+                    socketServidores.send(sendPacket);
                 }
             }
         } catch (Exception e) {
@@ -65,7 +65,7 @@ public class Servidor extends Thread {
         }
     }
 
-    private void validateLeader() {
+    private void validaLider() {
         boolean myself = false;
 
         if (lider == null) {
@@ -90,7 +90,7 @@ public class Servidor extends Thread {
                 DatagramSocket clientSocket = new DatagramSocket(PORT);
                 String sentence = "leader";
 
-                byte[] bufferIn = new byte[BUFFER_SIZE];
+                byte[] bufferIn = new byte[BUFFER_TAMANHO];
                 byte[] bufferOut = sentence.getBytes();
 
                 DatagramPacket sendPacket = new DatagramPacket(bufferOut, bufferOut.length, leader, PORT);
@@ -123,7 +123,7 @@ public class Servidor extends Thread {
                 if (server.isReachable(5000)) {
                     DatagramSocket clientSocket = new DatagramSocket(PORT);
                     String sentence = "leader";
-                    byte[] bufferIn = new byte[BUFFER_SIZE];
+                    byte[] bufferIn = new byte[BUFFER_TAMANHO];
                     byte[] bufferOut = sentence.getBytes();
 
                     DatagramPacket sendPacket = new DatagramPacket(bufferOut, bufferOut.length, server, PORT);
@@ -152,7 +152,7 @@ public class Servidor extends Thread {
                 if (server.isReachable(5000)) {
                     DatagramSocket clientSocket = new DatagramSocket(PORT);
                     String sentence = "processors";
-                    byte[] bufferIn = new byte[BUFFER_SIZE];
+                    byte[] bufferIn = new byte[BUFFER_TAMANHO];
                     byte[] bufferOut = sentence.getBytes();
 
                     DatagramPacket sendPacket = new DatagramPacket(bufferOut, bufferOut.length, server, PORT);
